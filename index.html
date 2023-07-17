@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>News</title>
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js" integrity="sha256-2Pmvv0kuTBOenSvLm6bvfBSSHrUJ+3A7x6P5Ebd07/g=" crossorigin="anonymous"></script>
+    <link href="https://fonts.cdnfonts.com/css/chomsky" rel="stylesheet">
+    <style>
+        * {
+            overflow-x: hidden;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+    
+        #news {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+    
+        .title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+    
+        .image {
+            max-width: 100%;
+            height: auto;
+            margin-bottom: 10px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+    
+        .content {
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+    
+        a {
+            color: #007bff;
+            text-decoration: none;
+        }
+    
+        a:hover {
+            text-decoration: underline;
+        }
+
+        hr {
+            border-top: 4px dotted gray;
+        }
+
+        .dropdown {
+            margin: 20px auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .dropdown label {
+            margin: 10px;
+            font-weight: bold;
+        }
+
+        .dropdown select {
+            padding: 8px;
+            font-size: 16px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+            appearance: none; 
+            background-color: #f8f9fa;
+            margin: 5px;
+        }
+
+        .dropdown select:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px #007bff; 
+        }
+
+        .dropdown button {
+            padding: 8px 16px;
+            font-size: 16px;
+            border-radius: 4px;
+            border: none;
+            background-color: #007bff;
+            color: #fff;
+            cursor: pointer;
+            margin: 5px;
+        }
+
+        .dropdown button:hover {
+            background-color: #0056b3;
+        }
+
+        @media (max-width: 600px) {
+            .dropdown {
+                flex-direction: column;
+                align-items: flex-start;
+                margin: 10px; 
+            }
+
+            .dropdown label {
+                margin-bottom: 5px; 
+            }
+
+            .dropdown select {
+                margin-bottom: 5px; 
+                width: 99%; 
+            }
+
+            .dropdown button {
+                margin-top: 10px;
+                width: 99%; 
+            }
+        }
+
+        .no-image {
+            display: none;
+        }
+
+        .navbar {
+            background-color: black;
+            color: #fff;
+            padding: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center; /* Updated rule */
+        }
+
+        .navbar h1 {
+            font-size: 48px;
+            margin: 0;
+            font-family: "Chomsky";
+        }
+
+        .navbar .toggle-switch {
+            margin-left: 10px;
+        }
+
+        #news h1:nth-of-type(1) {
+            margin-top: 0;
+        }
+    </style>
+    
+</head>
+<body>
+    <div class="navbar">
+        <h1>Insightful Times</h1>
+    </div>
+    <div class="dropdown">
+        <label for="country-select">Select Country:</label>
+        <select id="country-select" class="flag-icon">
+            <option value="us" data-icon="flag-icon flag-icon-us">United States</option>
+            <option value="gb" data-icon="flag-icon flag-icon-gb">United Kingdom</option>
+            <option value="ca" data-icon="flag-icon flag-icon-ca">Canada</option>
+            <option value="au" data-icon="flag-icon flag-icon-au">Australia</option>
+            <option value="in" data-icon="flag-icon flag-icon-in">India</option>
+        </select>
+        
+        <label for="category-select">Select Category:</label>
+        <select id="category-select">
+            <option value="all">All</option>
+            <option value="science">Science</option>
+            <option value="technology">Technology</option>
+            <option value="business">Business</option>
+            <option value="sports">Sports</option>
+            <option value="entertainment">Entertainment</option>
+            <option value="health">Health</option>
+        </select>
+
+        <button id="fetch-news">Get Latest News >></button>
+    </div>
+
+    <hr>
+
+    <div id="news"></div>
+    
+    <script>
+        function fetchNews(country, category) {
+            const apiKey = 'e57016c2538e437a8895b67d669f339e';
+            let url;
+
+            if (category == 'all') {
+                url = `https://newsapi.org/v2/top-headlines?country=${country}&apiKey=${apiKey}`;
+                console.log(url);
+            } else {
+                url = `https://newsapi.org/v2/top-headlines?country=${country}&category=${category}&apiKey=${apiKey}`;
+            }
+
+            $.getJSON(url, function (data) {
+                $("#news").empty();
+                data.articles.forEach(f => {
+                    if (!f.urlToImage || !f.description) {
+                        return;
+                    }
+
+                    $("#news").append(
+                        `
+                            <div class="news-item">
+                                <h1 class="title">${f.title}</h1>
+                                <img src="${f.urlToImage}" class="image">
+                                <p class="content">${f.description}</p>
+                                <p class="content">Read more at <a target="_blank" href="${f.url}">${f.url}</a>.</p>
+                                <hr>
+                            </div>
+                        `
+                    );
+                });
+            });
+        }
+
+        $(document).ready(function () {
+            fetchNews('us', 'all');
+
+            $('#fetch-news').click(function () {
+                const selectedCountry = $('#country-select').val();
+                const selectedCategory = $('#category-select').val();
+                fetchNews(selectedCountry, selectedCategory);
+            });
+        });
+    </script>
+</body>
+</html>
